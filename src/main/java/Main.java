@@ -9,13 +9,14 @@ public class Main {
                 final byte[] buf = new byte[512];
                 final DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 serverSocket.receive(packet);
-                System.out.println("Received data");
 
                 final DNSMessage questionMessage = DNSMessageParser.parse(buf);
+                System.out.println("Received data : " + questionMessage);
                 final DNSMessage responseMessage = new DNSMessage(
                     questionMessage.getPacketIdentifier(),
                     questionMessage.getLabel()
                 );
+                System.out.println("Response data : " + responseMessage);
                 byte[] bufResponse = responseMessage.getBuffer();
 
                 final DatagramPacket packetResponse = new DatagramPacket(bufResponse, bufResponse.length, packet.getSocketAddress());

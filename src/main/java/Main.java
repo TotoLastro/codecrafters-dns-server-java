@@ -15,14 +15,15 @@ public class Main {
                 final DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 serverSocket.receive(packet);
 
-                final DNSMessage questionMessage = DNSMessageParser.parse(buf);
+                final DNSMessage questionMessage = DNSMessageParser.decode(buf);
                 System.out.println("Received data : " + questionMessage);
                 final DNSMessage responseMessage = new DNSMessage(
                     questionMessage.getPacketIdentifier(),
-                    questionMessage.getLabel()
+                    questionMessage.getQuestionCount(),
+                    questionMessage.getLabels()
                 );
                 System.out.println("Response data : " + responseMessage);
-                byte[] bufResponse = responseMessage.getBuffer();
+                byte[] bufResponse = DNSMessageParser.encode(responseMessage);
 
                 final DatagramPacket packetResponse = new DatagramPacket(bufResponse, bufResponse.length, packet.getSocketAddress());
                 serverSocket.send(packetResponse);

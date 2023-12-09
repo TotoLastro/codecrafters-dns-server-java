@@ -1,15 +1,17 @@
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class DNSMessageParser {
     public static DNSMessage parse(byte[] buffer) {
-        final int packetIdentifier = buffer[0] << 8 + buffer[1];
-        int i = 12;
-        int labelLength = buffer[i++];
+        ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
+        final int packetIdentifier = byteBuffer.getShort();
+        byteBuffer.position(12);
+        int labelLength = byteBuffer.get();
         StringBuilder sb = new StringBuilder();
         do {
-            sb.append(new String(buffer, i, labelLength, StandardCharsets.UTF_8));
-            i += labelLength;
-            labelLength = buffer[i++];
+            sb.append(new String(buffer, byteBuffer.position(), labelLength, StandardCharsets.UTF_8));
+            byteBuffer.position(byteBuffer.position() + labelLength);
+            labelLength = byteBuffer.get();
             if (0 < labelLength) {
                 sb.append(".");
             }

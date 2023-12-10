@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.List;
 
 public class Main {
     public static void main2(String[] args) {
@@ -15,15 +16,11 @@ public class Main {
                 final DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 serverSocket.receive(packet);
 
-                final DNSMessage questionMessage = DNSMessageParser.decode(buf);
+                final DNSMessage questionMessage = DNSMessageDecoder.decode(buf);
                 System.out.println("Received data : " + questionMessage);
-                final DNSMessage responseMessage = new DNSMessage(
-                    questionMessage.getPacketIdentifier(),
-                    questionMessage.getQuestionCount(),
-                    questionMessage.getLabels()
-                );
+                final DNSMessage responseMessage = getResponseMessage(questionMessage);
                 System.out.println("Response data : " + responseMessage);
-                byte[] bufResponse = DNSMessageParser.encode(responseMessage);
+                byte[] bufResponse = DNSMessageEncoder.encode(responseMessage);
 
                 final DatagramPacket packetResponse = new DatagramPacket(bufResponse, bufResponse.length, packet.getSocketAddress());
                 serverSocket.send(packetResponse);
@@ -31,5 +28,22 @@ public class Main {
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
         }
+    }
+
+    private static DNSMessage getResponseMessage(DNSMessage questionMessage) {
+        DNSSectionAnswer responseAnswer = new DNSSectionAnswer(List.of(
+            new DNSSectionAnswer.DNSRecord(
+                DNSMessage.Type.A,
+                questionMessage.question().labels(),
+                60,
+                new byte[]{8, 8, 8, 8}
+            )
+        ));
+        DNSSectionHeader responseHeader = new DNSSectionHeader(
+            questionMessage.header().packetIdentifier(),
+            questionMessage.header().questionCount(),
+            responseAnswer.records().size()
+        );
+        return new DNSMessage(responseHeader, questionMessage.question(), responseAnswer);
     }
 }

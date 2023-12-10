@@ -1,30 +1,21 @@
-public class DNSMessage {
+import java.util.Arrays;
+import java.util.Optional;
 
-    private final int packetIdentifier;
-    private final int questionCount;
-    private final String labels;
+public record DNSMessage(DNSSectionHeader header, DNSSectionQuestion question, DNSSectionAnswer answer) {
 
-    public DNSMessage(int packetIdentifer, int questionCount, String labels) {
-        this.packetIdentifier = packetIdentifer;
-        this.questionCount = questionCount;
-        this.labels = labels;
-    }
+    public enum Type {
+        A(1),
+        CNAME(5);
+        public final int value;
 
-    public int getPacketIdentifier() {
-        return packetIdentifier;
-    }
+        Type(int value) {
+            this.value = value;
+        }
 
-    public int getQuestionCount() {
-        return questionCount;
-    }
-
-    public String getLabels() {
-        return labels;
-    }
-
-    public String toString() {
-        return DNSMessage.class.getSimpleName() + "(" +
-            "ID=" + getPacketIdentifier() + "," +
-            "label=" + getLabels() + ")";
+        public static Optional<Type> fromValue(int value) {
+            return Arrays.stream(values())
+                .filter(type -> type.value == value)
+                .findFirst();
+        }
     }
 }

@@ -20,9 +20,14 @@ public class DNSMessageDecoder {
     private static DNSSectionHeader decodeHeader(ByteBuffer byteBuffer) {
         byteBuffer.position(INDEX_SECTION_HEADER);
         final int packetIdentifier = byteBuffer.getShort();
+        final int firstFlagsByte = byteBuffer.get();
+        // OPCODE
+        final int operationCode = (firstFlagsByte >> 3) & 0b1111;
+        // Recursion Desired
+        final int recursionDesired = firstFlagsByte & 1;
         final int questionCount = byteBuffer.getShort(4);
         final int answerCount = byteBuffer.getShort(6);
-        return new DNSSectionHeader(packetIdentifier, questionCount, answerCount);
+        return new DNSSectionHeader(packetIdentifier, operationCode, recursionDesired, questionCount, answerCount);
     }
 
     private static DNSSectionQuestion decodeQuestion(ByteBuffer byteBuffer) {

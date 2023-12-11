@@ -4,11 +4,6 @@ import java.net.DatagramSocket;
 import java.util.List;
 
 public class Main {
-    public static void main2(String[] args) {
-        byte[] buffer = new byte[] { 0x77, (byte) 0xCE };
-        int result = (buffer[0] << 8) + (buffer[1] & 0xFF);
-        System.out.println(String.format("%16s", Integer.toBinaryString(result)).replace(" ", "0"));
-    }
     public static void main(String[] args) {
         try (DatagramSocket serverSocket = new DatagramSocket(2053)) {
             while(true) {
@@ -41,6 +36,8 @@ public class Main {
         ));
         DNSSectionHeader responseHeader = new DNSSectionHeader(
             questionMessage.header().packetIdentifier(),
+            questionMessage.header().operationCode(),
+            questionMessage.header().recursionDesired(),
             questionMessage.header().questionCount(),
             responseAnswer.records().size()
         );

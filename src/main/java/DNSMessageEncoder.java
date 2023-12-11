@@ -19,20 +19,24 @@ public class DNSMessageEncoder {
         // Question/Response : Always response
         int byteToStore = (byte) 0b10000000;
         // OPCODE
-        byteToStore &= (byte) 0b10000111;
+        byteToStore |= (header.operationCode() << 3);
         // Authoritative Answer
         byteToStore &= (byte) 0b11111011;
         // Truncation
         byteToStore &= (byte) 0b11111101;
         // Recursion Desired
-        byteToStore &= (byte) 0b11111110;
+        byteToStore |= header.recursionDesired();
         byteBuffer.put((byte) byteToStore);
         // Recursion Available
         byteToStore = (byte) 0b01111111;
         // Reserved
         byteToStore &= (byte) 0b10001111;
         // Error
-        byteToStore &= (byte) 0b11110000;
+        if (header.operationCode() == 0) {
+            byteToStore &= (byte) 0b11110000;
+        } else {
+            byteToStore &= (byte) 0b11110100;
+        }
         byteBuffer.put((byte) byteToStore);
         // Question Count
         byteBuffer.putShort((short) header.questionCount());

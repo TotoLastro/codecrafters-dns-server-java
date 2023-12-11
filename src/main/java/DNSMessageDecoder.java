@@ -58,7 +58,8 @@ public class DNSMessageDecoder {
             .mapToObj(i -> {
                 String labels = decodeLabels(byteBuffer);
                 int queryType = byteBuffer.getShort();
-                int queryClass = byteBuffer.getShort();
+                // queryClass
+                byteBuffer.getShort();
                 int ttl = byteBuffer.getInt();
                 int dataLength = byteBuffer.getShort();
                 byte[] data = new byte[dataLength];

@@ -33,8 +33,8 @@ public class DNSMessageDecoder {
     }
 
     private static String decodeLabels(ByteBuffer byteBuffer) {
-        int labelLength = byteBuffer.get();
         StringBuilder labelBuilder = new StringBuilder();
+        int labelLength = byteBuffer.get();
         while (0 < labelLength) {
             labelBuilder.append(new String(byteBuffer.array(), byteBuffer.position(), labelLength, StandardCharsets.UTF_8));
             byteBuffer.position(byteBuffer.position() + labelLength);

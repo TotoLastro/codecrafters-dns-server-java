@@ -7,7 +7,10 @@ public class DNSMessageEncoder {
         encodeHeaderSection(byteBuffer, message.header());
         encodeQuestionSection(byteBuffer, message.question());
         encodeAnswerSection(byteBuffer, message.answer());
-        return byteBuffer.array();
+        byte[] result = new byte[byteBuffer.position()];
+        byteBuffer.rewind();
+        byteBuffer.get(result);
+        return result;
     }
 
     private static void encodeHeaderSection(ByteBuffer byteBuffer, DNSSectionHeader header) {
@@ -34,7 +37,7 @@ public class DNSMessageEncoder {
         // Question Count
         byteBuffer.putShort((short) header.questionCount());
         // Answer Record Count
-        byteBuffer.putShort((short) 0);
+        byteBuffer.putShort((short) header.answerCount());
         // Authority Record Count
         byteBuffer.putShort((short) 0);
         // Additional Record Count
@@ -61,8 +64,6 @@ public class DNSMessageEncoder {
     }
 
     private static void encodeAnswerSection(ByteBuffer byteBuffer, DNSSectionAnswer answer) {
-        // Answer Record Count
-        byteBuffer.putShort((short) answer.records().size());
         for (DNSSectionAnswer.DNSRecord record : answer.records()) {
             // Labels
             encodeLabels(byteBuffer, record.name());

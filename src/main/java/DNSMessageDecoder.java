@@ -1,7 +1,9 @@
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -39,23 +41,26 @@ public class DNSMessageDecoder {
     }
 
     private static String decodeLabels(ByteBuffer byteBuffer) {
-        LinkedHashMap<Integer, String> labels = new LinkedHashMap<>();
+        Map<Integer, String> positionForEachLabels = new HashMap<>();
+        List<String> labels = new ArrayList<>();
         int position = byteBuffer.position();
         int labelLength = byteBuffer.get() & 0b11111111;
-        while (0 < labelLength) {
+        do {
             String label;
             if ((labelLength >> 6) == 0b11) {
-                position = ((labelLength & 0b00111111) << 8) | byteBuffer.get();
-                label = labels.get(position);
+                position = ((labelLength & 0b00111111) << 8) | (byteBuffer.get() & 0b11111111);
+                label = positionForEachLabels.get(position);
             } else {
                 label = new String(byteBuffer.array(), byteBuffer.position(), labelLength, StandardCharsets.UTF_8);
-                labels.put(position, label);
+                positionForEachLabels.put(position, label);
+                byteBuffer.position(byteBuffer.position() + label.length());
+                position = byteBuffer.position();
+                labelLength = byteBuffer.get();
             }
-            byteBuffer.position(byteBuffer.position() + label.length());
-            position = byteBuffer.position();
-            labelLength = byteBuffer.get();
-        }
-        return String.join(".", labels.values());
+            labels.add(label);
+        } while (0 < labelLength && (labelLength >> 6) != 0b11);
+
+        return String.join(".", labels);
     }
 
     private static DNSSectionAnswer decodeAnswer(ByteBuffer byteBuffer, String questionLabels) {

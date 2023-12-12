@@ -1,5 +1,6 @@
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -38,17 +39,23 @@ public class DNSMessageDecoder {
     }
 
     private static String decodeLabels(ByteBuffer byteBuffer) {
-        StringBuilder labelBuilder = new StringBuilder();
-        int labelLength = byteBuffer.get();
+        LinkedHashMap<Integer, String> labels = new LinkedHashMap<>();
+        int position = byteBuffer.position();
+        int labelLength = byteBuffer.get() & 0b11111111;
         while (0 < labelLength) {
-            labelBuilder.append(new String(byteBuffer.array(), byteBuffer.position(), labelLength, StandardCharsets.UTF_8));
-            byteBuffer.position(byteBuffer.position() + labelLength);
-            labelLength = byteBuffer.get();
-            if (0 < labelLength) {
-                labelBuilder.append(".");
+            String label;
+            if ((labelLength >> 6) == 0b11) {
+                position = ((labelLength & 0b00111111) << 8) | byteBuffer.get();
+                label = labels.get(position);
+            } else {
+                label = new String(byteBuffer.array(), byteBuffer.position(), labelLength, StandardCharsets.UTF_8);
+                labels.put(position, label);
             }
+            byteBuffer.position(byteBuffer.position() + label.length());
+            position = byteBuffer.position();
+            labelLength = byteBuffer.get();
         }
-        return labelBuilder.toString();
+        return String.join(".", labels.values());
     }
 
     private static DNSSectionAnswer decodeAnswer(ByteBuffer byteBuffer, String questionLabels) {

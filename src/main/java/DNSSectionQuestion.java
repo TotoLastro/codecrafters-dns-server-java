@@ -1,1 +1,5 @@
-public record DNSSectionQuestion(String labels, DNSMessage.Type type) {}
+import java.util.List;
+
+public record DNSSectionQuestion(List<DNSQuestion> questions) {
+    public record DNSQuestion(String labels, DNSMessage.Type type) {}
+}

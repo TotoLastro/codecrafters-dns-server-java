@@ -1,8 +1,11 @@
 import java.util.Arrays;
 import java.util.Optional;
 
-public record DNSMessage(DNSSectionHeader header, DNSSectionQuestion question, DNSSectionAnswer answer) {
-
+public record DNSMessage(
+    DNSSectionHeader header,
+    DNSSectionQuestion question,
+    DNSSectionAnswer answer
+) {
     public enum Type {
         A(1),
         CNAME(5);

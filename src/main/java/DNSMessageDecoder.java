@@ -15,8 +15,8 @@ public class DNSMessageDecoder {
     public static DNSMessage decode(byte[] buffer) {
         ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
         DNSSectionHeader header = decodeHeader(byteBuffer);
-        DNSSectionQuestion question = decodeQuestion(byteBuffer);
-        DNSSectionAnswer answer = decodeAnswer(byteBuffer, question.labels());
+        DNSSectionQuestion question = decodeQuestion(byteBuffer, header.questionCount());
+        DNSSectionAnswer answer = decodeAnswer(byteBuffer, question);
         return new DNSMessage(header, question, answer);
     }
 
@@ -33,11 +33,20 @@ public class DNSMessageDecoder {
         return new DNSSectionHeader(packetIdentifier, operationCode, recursionDesired, questionCount, answerCount);
     }
 
-    private static DNSSectionQuestion decodeQuestion(ByteBuffer byteBuffer) {
+    private static DNSSectionQuestion decodeQuestion(ByteBuffer byteBuffer, int numberOfQuestions) {
         byteBuffer.position(INDEX_SECTION_QUESTION);
-        String labels = decodeLabels(byteBuffer);
-        final int queryType = byteBuffer.getShort();
-        return new DNSSectionQuestion(labels, DNSMessage.Type.fromValue(queryType).orElseThrow());
+        return new DNSSectionQuestion(
+            IntStream.range(0, numberOfQuestions)
+                .mapToObj(i -> {
+                    String labels = decodeLabels(byteBuffer);
+                    final int queryType = byteBuffer.getShort();
+                    final int queryClass = byteBuffer.getShort();
+                    return new DNSSectionQuestion.DNSQuestion(
+                        labels,
+                        DNSMessage.Type.fromValue(queryType).orElseThrow()
+                    );
+                }).collect(Collectors.toList())
+        );
     }
 
     private static String decodeLabels(ByteBuffer byteBuffer) {
@@ -55,16 +64,24 @@ public class DNSMessageDecoder {
                 positionForEachLabels.put(position, label);
                 byteBuffer.position(byteBuffer.position() + label.length());
                 position = byteBuffer.position();
-                labelLength = byteBuffer.get();
+                labelLength = byteBuffer.get() & 0b11111111;
             }
             labels.add(label);
         } while (0 < labelLength && (labelLength >> 6) != 0b11);
 
+        if ((labelLength >> 6) == 0b11) {
+            position = ((labelLength & 0b00111111) << 8) | (byteBuffer.get() & 0b11111111);
+            labels.add(positionForEachLabels.get(position));
+        }
+
         return String.join(".", labels);
     }
 
-    private static DNSSectionAnswer decodeAnswer(ByteBuffer byteBuffer, String questionLabels) {
-        byteBuffer.position(INDEX_SECTION_QUESTION + questionLabels.length() + 6);
+    private static DNSSectionAnswer decodeAnswer(ByteBuffer byteBuffer, DNSSectionQuestion questionSection) {
+        final int questionsSize = questionSection.questions().stream()
+            .mapToInt(question -> question.labels().length() + 6)
+            .sum();
+        byteBuffer.position(INDEX_SECTION_QUESTION + questionsSize);
         final int answerCount = byteBuffer.getShort();
         List<DNSSectionAnswer.DNSRecord> records = IntStream.range(0, answerCount)
             .mapToObj(i -> {

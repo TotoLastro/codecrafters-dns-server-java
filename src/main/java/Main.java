@@ -1,7 +1,7 @@
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.util.List;
+import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
@@ -26,14 +26,16 @@ public class Main {
     }
 
     private static DNSMessage getResponseMessage(DNSMessage questionMessage) {
-        DNSSectionAnswer responseAnswer = new DNSSectionAnswer(List.of(
-            new DNSSectionAnswer.DNSRecord(
-                DNSMessage.Type.A,
-                questionMessage.question().labels(),
-                60,
-                new byte[]{8, 8, 8, 8}
-            )
-        ));
+        DNSSectionAnswer responseAnswer = new DNSSectionAnswer(
+            questionMessage.question().questions().stream()
+                .map(question -> new DNSSectionAnswer.DNSRecord(
+                    DNSMessage.Type.A,
+                    question.labels(),
+                    60,
+                    new byte[]{8, 8, 8, 8}
+                ))
+                .collect(Collectors.toList())
+        );
         DNSSectionHeader responseHeader = new DNSSectionHeader(
             questionMessage.header().packetIdentifier(),
             questionMessage.header().operationCode(),

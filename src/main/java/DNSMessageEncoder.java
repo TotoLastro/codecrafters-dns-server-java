@@ -48,12 +48,14 @@ public class DNSMessageEncoder {
         byteBuffer.putShort((short) 0);
     }
 
-    private static void encodeQuestionSection(ByteBuffer byteBuffer, DNSSectionQuestion question) {
-        encodeLabels(byteBuffer, question.labels());
-        // Type A (1) / CNAME (5)
-        byteBuffer.putShort((short) question.type().value);
-        // Class IN(ternet)
-        byteBuffer.putShort((short) 1);
+    private static void encodeQuestionSection(ByteBuffer byteBuffer, DNSSectionQuestion questionSection) {
+        for (DNSSectionQuestion.DNSQuestion question : questionSection.questions()) {
+            encodeLabels(byteBuffer, question.labels());
+            // Type A (1) / CNAME (5)
+            byteBuffer.putShort((short) question.type().value);
+            // Class IN(ternet)
+            byteBuffer.putShort((short) 1);
+        }
     }
 
     private static void encodeLabels(ByteBuffer byteBuffer, String question) {

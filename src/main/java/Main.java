@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
-        InetSocketAddress forwardAddress = retrieveForwardAddress(args);
-        try (DatagramSocket serverSocket = new DatagramSocket(2053)) {
+        final InetSocketAddress forwardAddress = retrieveForwardAddress(args);
+        try (final DatagramSocket serverSocket = new DatagramSocket(2053)) {
             serverSocket.setReuseAddress(true);
             while(true) {
                 final byte[] buf = new byte[512];

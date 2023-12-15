@@ -39,6 +39,7 @@ public class Main {
 
     private static InetSocketAddress retrieveForwardAddress(String[] args) {
         Map<String, String> arguments = parseArgs(args);
+        System.out.println("Arguments = " + arguments);
         if (arguments.containsKey("--resolver")) {
             String[] resolverAddress = arguments.get("--resolver").split(":");
             return new InetSocketAddress(

@@ -17,7 +17,7 @@ public class Main {
                 serverSocket.receive(packet);
 
                 final DNSMessage questionMessage = DNSMessageDecoder.decode(buf);
-                System.out.println("Received data : " + questionMessage);
+                System.out.println("Received data from " + packet.getSocketAddress() + " : " + questionMessage);
 
                 final DNSMessage responseMessage;
                 if (forwardAddress != null) {
@@ -26,10 +26,10 @@ public class Main {
                     responseMessage = getResponseMessage(questionMessage);
                 }
 
-                System.out.println("Response data : " + responseMessage);
                 byte[] bufResponse = DNSMessageEncoder.encode(responseMessage);
-
                 final DatagramPacket packetResponse = new DatagramPacket(bufResponse, bufResponse.length, packet.getSocketAddress());
+                System.out.println("Response data to " + packetResponse.getSocketAddress() + " : " + responseMessage);
+
                 serverSocket.send(packetResponse);
             }
         } catch (IOException e) {
@@ -69,16 +69,18 @@ public class Main {
         InetSocketAddress forwardAddress
     ) throws IOException {
         byte[] question = DNSMessageEncoder.encode(questionMessage);
-        DatagramPacket questionPacket = new DatagramPacket(question, question.length);
-        serverSocket.connect(forwardAddress);
+        DatagramPacket questionPacket = new DatagramPacket(question, question.length, forwardAddress);
+        System.out.println("Forward(" + questionPacket.getSocketAddress() + ") : " + questionMessage);
         serverSocket.send(questionPacket);
-        serverSocket.disconnect();
 
         final byte[] buf = new byte[512];
         final DatagramPacket responsePacket = new DatagramPacket(buf, buf.length);
         serverSocket.receive(responsePacket);
 
-        return DNSMessageDecoder.decode(buf);
+        DNSMessage responseMessage = DNSMessageDecoder.decode(buf);
+        System.out.println("Receive(" + responsePacket.getSocketAddress() + ") : " + responseMessage);
+
+        return responseMessage;
     }
 
     private static DNSMessage getResponseMessage(DNSMessage questionMessage) {

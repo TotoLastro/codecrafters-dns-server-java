@@ -28,10 +28,7 @@ public class Main {
 
                 final DatagramPacket responsePacket;
                 if (forwardAddress != null) {
-                    DatagramPacket responseFromForward = getResponsePacketFromForwardServer(questionMessage, serverSocket, forwardAddress);
-                    DNSMessage responseMessage = DNSMessageDecoder.decode(responseFromForward.getData());
-                    System.out.println("Received from forward server : " + Arrays.toString(Arrays.copyOf(buf, responseFromForward.getLength())));
-                    System.out.println("Receive(" + responseFromForward.getSocketAddress() + ") : " + responseMessage);
+                    DatagramPacket responseFromForward = getResponsePacketFromForwardServer(packet, serverSocket, forwardAddress);
                     responsePacket = new DatagramPacket(responseFromForward.getData(), responseFromForward.getLength(), packet.getSocketAddress());
                 } else {
                     final DNSMessage responseMessage = getResponseMessage(questionMessage);
@@ -40,7 +37,7 @@ public class Main {
                     System.out.println("Response data : " + responseMessage);
                 }
                 serverSocket.send(responsePacket);
-                System.out.println("Sent to " + responsePacket.getSocketAddress() + " : " + Arrays.toString(Arrays.copyOf(buf, responsePacket.getLength())));
+                System.out.println("Sent to " + responsePacket.getSocketAddress() + " : " + Arrays.toString(Arrays.copyOf(responsePacket.getData(), responsePacket.getLength())));
             }
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
@@ -73,21 +70,17 @@ public class Main {
         return arguments;
     }
 
-    private static DatagramPacket getResponsePacketFromForwardServer(
-        DNSMessage questionMessage,
-        DatagramSocket serverSocket,
-        InetSocketAddress forwardAddress
-    ) throws IOException {
-        byte[] question = DNSMessageEncoder.encode(questionMessage);
-        DatagramPacket questionPacket = new DatagramPacket(question, question.length, forwardAddress);
-        System.out.println("Forward(" + questionPacket.getSocketAddress() + ") : " + questionMessage);
-        serverSocket.send(questionPacket);
+    private static DatagramPacket getResponsePacketFromForwardServer(DatagramPacket packet, DatagramSocket serverSocket, InetSocketAddress forwardAddress) throws IOException {
+        DatagramPacket forwardedPacked = new DatagramPacket(packet.getData(), packet.getLength(), forwardAddress);
+        serverSocket.send(forwardedPacked);
+        System.out.println("Sent to forward server : " + Arrays.toString(Arrays.copyOf(forwardedPacked.getData(), forwardedPacked.getLength())));
 
         final byte[] buf = new byte[512];
-        final DatagramPacket responsePacket = new DatagramPacket(buf, buf.length);
-        serverSocket.receive(responsePacket);
-
-        return responsePacket;
+        final DatagramPacket responseFromForward = new DatagramPacket(buf, buf.length);
+        serverSocket.receive(responseFromForward);
+        System.out.println("Received from forward server : " + Arrays.toString(Arrays.copyOf(responseFromForward.getData(), responseFromForward.getLength())));
+        System.out.println("Receive(" + responseFromForward.getSocketAddress() + ") : " + DNSMessageDecoder.decode(responseFromForward.getData()));
+        return responseFromForward;
     }
 
     private static DNSMessage getResponseMessage(DNSMessage questionMessage) {

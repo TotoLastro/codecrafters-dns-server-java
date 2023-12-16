@@ -71,9 +71,7 @@ public class DNSMessageDecoder {
             labelLength = byteBuffer.get() & 0b11111111;
             if ((labelLength >> 6) == 0b11) {
                 int position = ((labelLength & 0b00111111) << 8) | (byteBuffer.get() & 0b11111111);
-                ByteBuffer subBuffer = byteBuffer.duplicate();
-                subBuffer.position(position);
-                labels.add(decodeLabels(subBuffer));
+                labels.add(decodeLabels(byteBuffer.duplicate().position(position)));
             } else if (0 < labelLength) {
                 String label = new String(byteBuffer.array(), byteBuffer.position(), labelLength, StandardCharsets.UTF_8);
                 byteBuffer.position(byteBuffer.position() + label.length());

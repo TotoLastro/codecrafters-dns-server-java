@@ -1,9 +1,7 @@
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -67,29 +65,21 @@ public class DNSMessageDecoder {
     }
 
     private static String decodeLabels(ByteBuffer byteBuffer) {
-        Map<Integer, String> positionForEachLabels = new HashMap<>();
         List<String> labels = new ArrayList<>();
-        int position = byteBuffer.position();
-        int labelLength = byteBuffer.get() & 0b11111111;
+        int labelLength;
         do {
-            String label;
+            labelLength = byteBuffer.get() & 0b11111111;
             if ((labelLength >> 6) == 0b11) {
-                position = ((labelLength & 0b00111111) << 8) | (byteBuffer.get() & 0b11111111);
-                label = positionForEachLabels.get(position);
-            } else {
-                label = new String(byteBuffer.array(), byteBuffer.position(), labelLength, StandardCharsets.UTF_8);
-                positionForEachLabels.put(position, label);
+                int position = ((labelLength & 0b00111111) << 8) | (byteBuffer.get() & 0b11111111);
+                ByteBuffer subBuffer = byteBuffer.duplicate();
+                subBuffer.position(position);
+                labels.add(decodeLabels(subBuffer));
+            } else if (0 < labelLength) {
+                String label = new String(byteBuffer.array(), byteBuffer.position(), labelLength, StandardCharsets.UTF_8);
                 byteBuffer.position(byteBuffer.position() + label.length());
-                position = byteBuffer.position();
-                labelLength = byteBuffer.get() & 0b11111111;
+                labels.add(label);
             }
-            labels.add(label);
         } while (0 < labelLength && (labelLength >> 6) != 0b11);
-
-        if ((labelLength >> 6) == 0b11) {
-            position = ((labelLength & 0b00111111) << 8) | (byteBuffer.get() & 0b11111111);
-            labels.add(positionForEachLabels.get(position));
-        }
 
         return String.join(".", labels);
     }

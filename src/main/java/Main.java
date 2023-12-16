@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,7 +20,8 @@ public class Main {
                 final byte[] buf = new byte[512];
                 final DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 serverSocket.receive(packet);
-                System.out.println("Received from " + packet.getSocketAddress());
+
+                System.out.println("Received from " + packet.getSocketAddress() + " : " + Arrays.toString(Arrays.copyOf(buf, packet.getLength())));
 
                 final DNSMessage questionMessage = DNSMessageDecoder.decode(buf);
                 System.out.println("Received data : " + questionMessage);
@@ -28,6 +30,7 @@ public class Main {
                 if (forwardAddress != null) {
                     DatagramPacket responseFromForward = getResponsePacketFromForwardServer(questionMessage, serverSocket, forwardAddress);
                     DNSMessage responseMessage = DNSMessageDecoder.decode(responseFromForward.getData());
+                    System.out.println("Received from forward server : " + Arrays.toString(Arrays.copyOf(buf, responseFromForward.getLength())));
                     System.out.println("Receive(" + responseFromForward.getSocketAddress() + ") : " + responseMessage);
                     responsePacket = new DatagramPacket(responseFromForward.getData(), responseFromForward.getLength(), packet.getSocketAddress());
                 } else {
@@ -37,7 +40,7 @@ public class Main {
                     System.out.println("Response data : " + responseMessage);
                 }
                 serverSocket.send(responsePacket);
-                System.out.println("Sent to " + responsePacket.getSocketAddress());
+                System.out.println("Sent to " + responsePacket.getSocketAddress() + " : " + Arrays.toString(Arrays.copyOf(buf, responsePacket.getLength())));
             }
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());

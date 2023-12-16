@@ -1,5 +1,5 @@
 import java.util.List;
 
 public record DNSSectionAnswer(List<DNSRecord> records) {
-    public record DNSRecord(DNSMessage.Type type, String name, int ttl, byte[] data) {}
+    public record DNSRecord(String name, DNSMessage.Type dataType, DNSMessage.ClassType dataClass, int ttl, byte[] data) {}
 }

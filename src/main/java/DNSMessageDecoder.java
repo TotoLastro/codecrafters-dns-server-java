@@ -18,21 +18,36 @@ public class DNSMessageDecoder {
     }
 
     private static DNSSectionHeader decodeHeader(ByteBuffer byteBuffer) {
-        final int packetIdentifier = byteBuffer.getShort();
-        final int firstFlagsByte = byteBuffer.get();
-        // OPCODE
-        final int operationCode = (firstFlagsByte >> 3) & 0b1111;
-        // Recursion Desired
-        final int recursionDesired = firstFlagsByte & 1;
-        // Recursion Available + Reserved + Error
-        byteBuffer.get();
+        final int packetIdentifier = byteBuffer.getShort() & 0xFFFF;
+        byte firstBitMask = byteBuffer.get();
+        final int questionOrReponse = (firstBitMask >> 7) & 1;
+        final int operationCode = (firstBitMask >> 3) & 0b1111;
+        final int authoritativeAnswer = (firstBitMask >> 2) & 1;
+        final int truncation = (firstBitMask >> 1) & 1;
+        final int recursionDesired = firstBitMask & 1;
+        byte secondBitMask = byteBuffer.get();
+        final int recursionAvailable = (secondBitMask >> 7) & 1;
+        final int reserved = (secondBitMask >> 4) & 0b111;
+        final int error = secondBitMask & 0b1111;
         final int questionCount = byteBuffer.getShort();
         final int answerCount = byteBuffer.getShort();
-        // Name Server Count
-        byteBuffer.getShort();
-        // Additional Record Count
-        byteBuffer.getShort();
-        return new DNSSectionHeader(packetIdentifier, operationCode, recursionDesired, questionCount, answerCount);
+        final int nameserverCount = byteBuffer.getShort();
+        final int additionalRecordCount = byteBuffer.getShort();
+        return new DNSSectionHeader(
+            packetIdentifier,
+            DNSSectionHeader.QueryOrResponse.fromValue(questionOrReponse).orElseThrow(),
+            operationCode,
+            authoritativeAnswer,
+            truncation,
+            recursionDesired,
+            recursionAvailable,
+            reserved,
+            error,
+            questionCount,
+            answerCount,
+            nameserverCount,
+            additionalRecordCount
+        );
     }
 
     private static DNSSectionQuestion decodeQuestion(ByteBuffer byteBuffer, int numberOfQuestions) {
@@ -41,11 +56,11 @@ public class DNSMessageDecoder {
                 .mapToObj(i -> {
                     String labels = decodeLabels(byteBuffer);
                     final int queryType = byteBuffer.getShort();
-                    // Query Class
-                    byteBuffer.getShort();
+                    final int queryClass = byteBuffer.getShort();
                     return new DNSSectionQuestion.DNSQuestion(
                         labels,
-                        DNSMessage.Type.fromValue(queryType).orElseThrow()
+                        DNSMessage.Type.fromValue(queryType).orElseThrow(),
+                        DNSMessage.ClassType.fromValue(queryClass).orElseThrow()
                     );
                 }).collect(Collectors.toList())
         );
@@ -84,13 +99,18 @@ public class DNSMessageDecoder {
             .mapToObj(i -> {
                 String labels = decodeLabels(byteBuffer);
                 int queryType = byteBuffer.getShort();
-                // queryClass
-                byteBuffer.getShort();
+                int queryClass = byteBuffer.getShort();
                 int ttl = byteBuffer.getInt();
                 int dataLength = byteBuffer.getShort();
                 byte[] data = new byte[dataLength];
                 byteBuffer.get(data);
-                return new DNSSectionAnswer.DNSRecord(DNSMessage.Type.fromValue(queryType).orElseThrow(), labels, ttl, data);
+                return new DNSSectionAnswer.DNSRecord(
+                    labels,
+                    DNSMessage.Type.fromValue(queryType).orElseThrow(),
+                    DNSMessage.ClassType.fromValue(queryClass).orElseThrow(),
+                    ttl,
+                    data
+                );
             })
             .collect(Collectors.toList());
         return new DNSSectionAnswer(records);

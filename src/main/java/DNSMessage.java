@@ -21,4 +21,22 @@ public record DNSMessage(
                 .findFirst();
         }
     }
+
+    public enum ClassType {
+        INTERNET(1),
+        CSNET(2),
+        CHAOS(3),
+        HESIOD(4);
+        public final int value;
+
+        ClassType(int value) {
+            this.value = value;
+        }
+
+        public static Optional<ClassType> fromValue(int value) {
+            return Arrays.stream(values())
+                .filter(type -> type.value == value)
+                .findFirst();
+        }
+    }
 }

@@ -7,6 +7,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Main {
+
+    public static final int NO_ERROR = 0;
+    public static final int NOT_IMPLEMENTED = 4;
+
     public static void main(String[] args) {
         final InetSocketAddress forwardAddress = retrieveForwardAddress(args);
         try (final DatagramSocket serverSocket = new DatagramSocket(2053)) {
@@ -84,8 +88,9 @@ public class Main {
         DNSSectionAnswer responseAnswer = new DNSSectionAnswer(
             questionMessage.question().questions().stream()
                 .map(question -> new DNSSectionAnswer.DNSRecord(
-                    DNSMessage.Type.A,
                     question.labels(),
+                    DNSMessage.Type.A,
+                    DNSMessage.ClassType.INTERNET,
                     60,
                     new byte[]{8, 8, 8, 8}
                 ))
@@ -93,11 +98,23 @@ public class Main {
         );
         DNSSectionHeader responseHeader = new DNSSectionHeader(
             questionMessage.header().packetIdentifier(),
+            DNSSectionHeader.QueryOrResponse.RESPONSE,
             questionMessage.header().operationCode(),
-            questionMessage.header().recursionDesired(),
+            0,
+            0,
+            0,
+            0,
+            0,
+            isStandardQuery(questionMessage) ? NO_ERROR : NOT_IMPLEMENTED,
             questionMessage.header().questionCount(),
-            responseAnswer.records().size()
+            responseAnswer.records().size(),
+            0,
+            0
         );
         return new DNSMessage(responseHeader, questionMessage.question(), responseAnswer);
+    }
+
+    private static boolean isStandardQuery(DNSMessage questionMessage) {
+        return questionMessage.header().operationCode() == 0;
     }
 }

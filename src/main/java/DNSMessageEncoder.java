@@ -14,56 +14,34 @@ public class DNSMessageEncoder {
     }
 
     private static void encodeHeaderSection(ByteBuffer byteBuffer, DNSSectionHeader header) {
-        // Packet Identifer
         byteBuffer.putShort((short) header.packetIdentifier());
-        // Question/Response : Always response
-        int byteToStore = (byte) 0b10000000;
-        // OPCODE
+        int byteToStore = header.queryOrResponse().value << 7;
         byteToStore |= (header.operationCode() << 3);
-        // Authoritative Answer
-        byteToStore &= (byte) 0b11111011;
-        // Truncation
-        byteToStore &= (byte) 0b11111101;
-        // Recursion Desired
+        byteToStore |= (header.authoritativeAnswer() << 2);
+        byteToStore |= (header.truncation() << 1);
         byteToStore |= header.recursionDesired();
         byteBuffer.put((byte) byteToStore);
-        // Recursion Available
-        byteToStore = (byte) 0b01111111;
-        // Reserved
-        byteToStore &= (byte) 0b10001111;
-        // Error
-        if (header.operationCode() == 0) {
-            byteToStore &= (byte) 0b11110000;
-        } else {
-            byteToStore &= (byte) 0b11110100;
-        }
+        byteToStore = header.recursionAvailable() << 7;
+        byteToStore |= (header.reserved() << 4);
+        byteToStore |= header.error();
         byteBuffer.put((byte) byteToStore);
-        // Question Count
         byteBuffer.putShort((short) header.questionCount());
-        // Answer Record Count
         byteBuffer.putShort((short) header.answerCount());
-        // Authority Record Count
-        byteBuffer.putShort((short) 0);
-        // Additional Record Count
-        byteBuffer.putShort((short) 0);
+        byteBuffer.putShort((short) header.nameserverCount());
+        byteBuffer.putShort((short) header.additionalRecordCount());
     }
 
     private static void encodeQuestionSection(ByteBuffer byteBuffer, DNSSectionQuestion questionSection) {
         for (DNSSectionQuestion.DNSQuestion question : questionSection.questions()) {
             encodeLabels(byteBuffer, question.labels());
-            // Type A (1) / CNAME (5)
             byteBuffer.putShort((short) question.type().value);
-            // Class IN(ternet)
-            byteBuffer.putShort((short) 1);
+            byteBuffer.putShort((short) question.classType().value);
         }
     }
 
     private static void encodeLabels(ByteBuffer byteBuffer, String question) {
-        // Labels
         for (String label : question.split("\\.")) {
-            // Label Length
             byteBuffer.put((byte) label.length());
-            // Label
             byteBuffer.put(label.getBytes());
         }
         byteBuffer.put((byte) 0);
@@ -71,17 +49,11 @@ public class DNSMessageEncoder {
 
     private static void encodeAnswerSection(ByteBuffer byteBuffer, DNSSectionAnswer answer) {
         for (DNSSectionAnswer.DNSRecord record : answer.records()) {
-            // Labels
             encodeLabels(byteBuffer, record.name());
-            // Type A (1) / CNAME (5)
-            byteBuffer.putShort((short) record.type().value);
-            // Class IN(ternet)
-            byteBuffer.putShort((short) 1);
-            // TTL
+            byteBuffer.putShort((short) record.dataType().value);
+            byteBuffer.putShort((short) record.dataClass().value);
             byteBuffer.putInt(record.ttl());
-            // Data Length
             byteBuffer.putShort((short) record.data().length);
-            // Data
             byteBuffer.put(record.data());
         }
     }

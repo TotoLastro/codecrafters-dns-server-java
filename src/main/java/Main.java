@@ -19,31 +19,34 @@ public class Main {
                 final byte[] buf = new byte[512];
                 final DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 serverSocket.receive(packet);
+                System.out.println(STR."Received from \{packet.getSocketAddress()}");
 
                 final DNSMessage questionMessage = DNSMessageDecoder.decode(buf);
-                System.out.println("Received data from " + packet.getSocketAddress() + " : " + questionMessage);
+                System.out.println(STR."Received data : \{questionMessage}");
 
                 final DatagramPacket responsePacket;
                 if (forwardAddress != null) {
-                    responsePacket = getResponsePacketFromForwardServer(questionMessage, serverSocket, forwardAddress);
-                    DNSMessage responseMessage = DNSMessageDecoder.decode(responsePacket.getData());
-                    System.out.println("Receive(" + responsePacket.getSocketAddress() + ") : " + responseMessage);
+                    DatagramPacket responseFromForward = getResponsePacketFromForwardServer(questionMessage, serverSocket, forwardAddress);
+                    DNSMessage responseMessage = DNSMessageDecoder.decode(responseFromForward.getData());
+                    System.out.println(STR."Receive(\{responseFromForward.getSocketAddress()}) : \{responseMessage}");
+                    responsePacket = new DatagramPacket(responseFromForward.getData(), responseFromForward.getLength(), packet.getSocketAddress());
                 } else {
                     final DNSMessage responseMessage = getResponseMessage(questionMessage);
                     byte[] bufResponse = DNSMessageEncoder.encode(responseMessage);
                     responsePacket = new DatagramPacket(bufResponse, bufResponse.length, packet.getSocketAddress());
-                    System.out.println("Response data to " + responsePacket.getSocketAddress() + " : " + responseMessage);
+                    System.out.println(STR."Response data : \{responseMessage}");
                 }
                 serverSocket.send(responsePacket);
+                System.out.println(STR."Sent to \{responsePacket.getSocketAddress()}");
             }
         } catch (IOException e) {
-            System.out.println("IOException: " + e.getMessage());
+            System.out.println(STR."IOException: \{e.getMessage()}");
         }
     }
 
     private static InetSocketAddress retrieveForwardAddress(String[] args) {
         Map<String, String> arguments = parseArgs(args);
-        System.out.println("Arguments = " + arguments);
+        System.out.println(STR."Arguments = \{arguments}");
         if (arguments.containsKey("--resolver")) {
             String[] resolverAddress = arguments.get("--resolver").split(":");
             return new InetSocketAddress(

@@ -57,7 +57,7 @@ public class ForwardedDNSResponse implements DNSResponseRetriever {
     private DNSSectionHeader cloneForOneQuestion(DNSSectionHeader header) {
         return new DNSSectionHeader(
             new Random().nextInt(1, Short.MAX_VALUE * 2),
-            header.queryOrResponse(),
+            DNSSectionHeader.QueryOrResponse.QUERY,
             header.operationCode(),
             header.authoritativeAnswer(),
             header.truncation(),
@@ -75,7 +75,7 @@ public class ForwardedDNSResponse implements DNSResponseRetriever {
     private DNSSectionHeader cloneWithSpecifiedAnswers(DNSSectionHeader header, int answerCount) {
         return new DNSSectionHeader(
             header.packetIdentifier(),
-            header.queryOrResponse(),
+            DNSSectionHeader.QueryOrResponse.RESPONSE,
             header.operationCode(),
             header.authoritativeAnswer(),
             header.truncation(),

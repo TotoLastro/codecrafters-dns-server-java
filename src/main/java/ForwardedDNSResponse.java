@@ -26,9 +26,8 @@ public class ForwardedDNSResponse implements DNSResponseRetriever {
             responses.addAll(responseMessage.answer().records());
         }
 
-        int questionCount = questionMessage.header().questionCount();
         return new DNSMessage(
-            cloneWithXQuestionAndYAnswer(questionMessage.header(), questionCount, responses.size()),
+            cloneWithSpecifiedAnswers(questionMessage.header(), responses.size()),
             questionMessage.question(),
             new DNSSectionAnswer(responses)
         );
@@ -36,7 +35,7 @@ public class ForwardedDNSResponse implements DNSResponseRetriever {
 
     private DNSMessage getResponseForQuestion(DNSSectionHeader headerQuestion, DNSSectionQuestion.DNSQuestion question) throws IOException {
         DNSMessage message = new DNSMessage(
-            cloneWithXQuestionAndYAnswer(headerQuestion, 1, 0),
+            cloneForOneQuestion(headerQuestion),
             new DNSSectionQuestion(Collections.singletonList(question)),
             new DNSSectionAnswer(Collections.emptyList())
         );
@@ -55,9 +54,9 @@ public class ForwardedDNSResponse implements DNSResponseRetriever {
         return responseMessage;
     }
 
-    private DNSSectionHeader cloneWithXQuestionAndYAnswer(DNSSectionHeader header, int questionCount, int answerCount) {
+    private DNSSectionHeader cloneForOneQuestion(DNSSectionHeader header) {
         return new DNSSectionHeader(
-            new Random().nextInt(1, Short.MAX_VALUE*2),
+            new Random().nextInt(1, Short.MAX_VALUE * 2),
             header.queryOrResponse(),
             header.operationCode(),
             header.authoritativeAnswer(),
@@ -66,10 +65,28 @@ public class ForwardedDNSResponse implements DNSResponseRetriever {
             header.recursionAvailable(),
             header.reserved(),
             header.error(),
-            questionCount,
-            answerCount,
+            1,
+            0,
             0,
             0
+        );
+    }
+
+    private DNSSectionHeader cloneWithSpecifiedAnswers(DNSSectionHeader header, int answerCount) {
+        return new DNSSectionHeader(
+            header.packetIdentifier(),
+            header.queryOrResponse(),
+            header.operationCode(),
+            header.authoritativeAnswer(),
+            header.truncation(),
+            header.recursionDesired(),
+            header.recursionAvailable(),
+            header.reserved(),
+            header.error(),
+            header.questionCount(),
+            answerCount,
+            header.nameserverCount(),
+            header.additionalRecordCount()
         );
     }
 }

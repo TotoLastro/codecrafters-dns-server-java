@@ -6,6 +6,10 @@ public record DNSMessage(
     DNSSectionQuestion question,
     DNSSectionAnswer answer
 ) {
+    public boolean isStandardQuery() {
+        return header().operationCode() == 0;
+    }
+
     public enum Type {
         A(1),
         CNAME(5);

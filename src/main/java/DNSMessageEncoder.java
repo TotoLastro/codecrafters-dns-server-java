@@ -8,8 +8,7 @@ public class DNSMessageEncoder {
         encodeQuestionSection(byteBuffer, message.question());
         encodeAnswerSection(byteBuffer, message.answer());
         byte[] result = new byte[byteBuffer.position()];
-        byteBuffer.rewind();
-        byteBuffer.get(result);
+        byteBuffer.rewind().get(result);
         return result;
     }
 

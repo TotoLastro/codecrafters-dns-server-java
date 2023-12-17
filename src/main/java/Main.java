@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,19 +16,16 @@ public class Main {
                 final DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 serverSocket.receive(packet);
 
-                System.out.println("Received from " + packet.getSocketAddress() + " : " + Arrays.toString(Arrays.copyOf(buf, packet.getLength())));
-
                 final DNSMessage questionMessage = DNSMessageDecoder.decode(buf);
-                System.out.println("Received data : " + questionMessage);
+                System.out.println("OriginalRequest(" + packet.getSocketAddress() + ") : " + questionMessage);
 
                 final DNSResponseRetriever responseRetriever = createDNSResponseRetriever(forwardAddress, serverSocket);
                 final DNSMessage responseMessage = responseRetriever.getResponseMessage(questionMessage);
-                System.out.println("Response data : " + responseMessage);
+                System.out.println("FinalResponse(" + packet.getSocketAddress() + ") : " + responseMessage);
 
                 byte[] bufResponse = DNSMessageEncoder.encode(responseMessage);
                 DatagramPacket responsePacket = new DatagramPacket(bufResponse, bufResponse.length, packet.getSocketAddress());
                 serverSocket.send(responsePacket);
-                System.out.println("Sent to " + responsePacket.getSocketAddress() + " : " + Arrays.toString(bufResponse));
             }
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());

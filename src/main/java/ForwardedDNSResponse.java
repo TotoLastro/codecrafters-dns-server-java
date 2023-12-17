@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class ForwardedDNSResponse implements DNSResponseRetriever {
 
@@ -19,16 +20,19 @@ public class ForwardedDNSResponse implements DNSResponseRetriever {
 
     @Override
     public DNSMessage getResponseMessage(DNSMessage questionMessage) throws IOException {
-        List<DNSSectionAnswer.DNSRecord> responses = new ArrayList<>();
+        List<DNSMessage> responses = new ArrayList<>();
         for (DNSSectionQuestion.DNSQuestion question : questionMessage.question().questions()) {
             DNSMessage responseMessage = getResponseForQuestion(questionMessage.header(), question);
-            responses.addAll(responseMessage.answer().records());
+            responses.add(responseMessage);
         }
 
+        List<DNSSectionAnswer.DNSRecord> answers = responses.stream()
+            .flatMap(r -> r.answer().records().stream())
+            .collect(Collectors.toList());
         return new DNSMessage(
-            cloneWithSpecifiedAnswers(questionMessage.header(), responses.size()),
+            cloneWithSpecifiedAnswers(questionMessage.header(), responses),
             questionMessage.question(),
-            new DNSSectionAnswer(responses)
+            new DNSSectionAnswer(answers)
         );
     }
 
@@ -69,19 +73,20 @@ public class ForwardedDNSResponse implements DNSResponseRetriever {
         );
     }
 
-    private DNSSectionHeader cloneWithSpecifiedAnswers(DNSSectionHeader header, int answerCount) {
+    private DNSSectionHeader cloneWithSpecifiedAnswers(DNSSectionHeader header, List<DNSMessage> answers) {
+        List<DNSSectionHeader> responseHeaders = answers.stream().map(DNSMessage::header).toList();
         return new DNSSectionHeader(
             header.packetIdentifier(),
             DNSSectionHeader.QueryOrResponse.RESPONSE,
             header.operationCode(),
-            header.authoritativeAnswer(),
-            header.truncation(),
+            responseHeaders.stream().map(DNSSectionHeader::authoritativeAnswer).findFirst().orElse(header.authoritativeAnswer()),
+            responseHeaders.stream().map(DNSSectionHeader::truncation).findFirst().orElse(header.truncation()),
             header.recursionDesired(),
-            header.recursionAvailable(),
-            header.reserved(),
-            header.error(),
+            responseHeaders.stream().map(DNSSectionHeader::recursionAvailable).findFirst().orElse(header.recursionAvailable()),
+            responseHeaders.stream().map(DNSSectionHeader::reserved).findFirst().orElse(header.reserved()),
+            responseHeaders.stream().map(DNSSectionHeader::error).findFirst().orElse(header.error()),
             header.questionCount(),
-            answerCount,
+            (int) answers.stream().mapToLong(m -> m.answer().records().size()).sum(),
             header.nameserverCount(),
             header.additionalRecordCount()
         );

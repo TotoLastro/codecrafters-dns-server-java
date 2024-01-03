@@ -3,6 +3,9 @@ package domain.model;
 import java.util.Arrays;
 import java.util.Optional;
 
+import lombok.Builder;
+
+@Builder
 public record DNSSectionHeader(
     int packetIdentifier,
     QueryOrResponse queryOrResponse,

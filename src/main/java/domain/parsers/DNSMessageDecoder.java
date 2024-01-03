@@ -77,16 +77,24 @@ public class DNSMessageDecoder {
         do {
             labelLength = byteBuffer.get() & 0b11111111;
             if ((labelLength >> 6) == 0b11) {
-                int position = ((labelLength & 0b00111111) << 8) | (byteBuffer.get() & 0b11111111);
-                labels.add(decodeLabels(byteBuffer.duplicate().position(position)));
+                labels.add(decodeCompressedLabel(byteBuffer, labelLength));
             } else if (0 < labelLength) {
-                String label = new String(byteBuffer.array(), byteBuffer.position(), labelLength, StandardCharsets.UTF_8);
-                byteBuffer.position(byteBuffer.position() + label.length());
-                labels.add(label);
+                labels.add(decodeRawLabel(byteBuffer, labelLength));
             }
         } while (0 < labelLength && (labelLength >> 6) != 0b11);
 
         return String.join(".", labels);
+    }
+
+    private static String decodeRawLabel(ByteBuffer byteBuffer, int labelLength) {
+        String label = new String(byteBuffer.array(), byteBuffer.position(), labelLength, StandardCharsets.UTF_8);
+        byteBuffer.position(byteBuffer.position() + label.length());
+        return label;
+    }
+
+    private static String decodeCompressedLabel(ByteBuffer byteBuffer, int labelLength) {
+        int position = ((labelLength & 0b00111111) << 8) | (byteBuffer.get() & 0b11111111);
+        return decodeLabels(byteBuffer.duplicate().position(position));
     }
 
     private static DNSSectionAnswer decodeAnswer(ByteBuffer byteBuffer, int numberOfAnswers) {

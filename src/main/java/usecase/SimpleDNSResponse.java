@@ -1,4 +1,10 @@
+package usecase;
+
 import java.util.stream.Collectors;
+
+import domain.model.DNSMessage;
+import domain.model.DNSSectionAnswer;
+import domain.model.DNSSectionHeader;
 
 public class SimpleDNSResponse implements DNSResponseRetriever {
 

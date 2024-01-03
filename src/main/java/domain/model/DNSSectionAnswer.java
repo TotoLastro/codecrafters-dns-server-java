@@ -1,3 +1,5 @@
+package domain.model;
+
 import java.util.List;
 
 public record DNSSectionAnswer(List<DNSRecord> records) {

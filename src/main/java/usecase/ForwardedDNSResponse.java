@@ -1,3 +1,5 @@
+package usecase;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -7,6 +9,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+
+import domain.model.DNSMessage;
+import domain.model.DNSSectionAnswer;
+import domain.model.DNSSectionHeader;
+import domain.model.DNSSectionQuestion;
+import domain.parsers.DNSMessageDecoder;
+import domain.parsers.DNSMessageEncoder;
 
 public class ForwardedDNSResponse implements DNSResponseRetriever {
 

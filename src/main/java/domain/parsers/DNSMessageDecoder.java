@@ -1,9 +1,16 @@
+package domain.parsers;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import domain.model.DNSMessage;
+import domain.model.DNSSectionAnswer;
+import domain.model.DNSSectionHeader;
+import domain.model.DNSSectionQuestion;
 
 public class DNSMessageDecoder {
 

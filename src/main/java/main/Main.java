@@ -1,9 +1,18 @@
+package main;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
+
+import domain.model.DNSMessage;
+import domain.parsers.DNSMessageDecoder;
+import domain.parsers.DNSMessageEncoder;
+import usecase.DNSResponseRetriever;
+import usecase.ForwardedDNSResponse;
+import usecase.SimpleDNSResponse;
 
 public class Main {
 

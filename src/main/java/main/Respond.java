@@ -1,11 +1,15 @@
+package main;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
-public class Respond {
+import domain.model.DNSMessage;
+import domain.parsers.DNSMessageDecoder;
+import domain.parsers.DNSMessageEncoder;
+import usecase.SimpleDNSResponse;
 
-    public static final int NO_ERROR = 0;
-    public static final int NOT_IMPLEMENTED = 4;
+public class Respond {
 
     public static void main(String[] args) {
         try (final DatagramSocket serverSocket = new DatagramSocket(2054)) {

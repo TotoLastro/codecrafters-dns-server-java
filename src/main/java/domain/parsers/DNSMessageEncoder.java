@@ -1,6 +1,15 @@
+package domain.parsers;
+
 import java.nio.ByteBuffer;
 
+import domain.model.DNSMessage;
+import domain.model.DNSSectionAnswer;
+import domain.model.DNSSectionHeader;
+import domain.model.DNSSectionQuestion;
+
 public class DNSMessageEncoder {
+
+    private DNSMessageEncoder() {}
 
     public static byte[] encode(DNSMessage message) {
         ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[512]);
@@ -47,13 +56,13 @@ public class DNSMessageEncoder {
     }
 
     private static void encodeAnswerSection(ByteBuffer byteBuffer, DNSSectionAnswer answer) {
-        for (DNSSectionAnswer.DNSRecord record : answer.records()) {
-            encodeLabels(byteBuffer, record.name());
-            byteBuffer.putShort((short) record.dataType().value);
-            byteBuffer.putShort((short) record.dataClass().value);
-            byteBuffer.putInt(record.ttl());
-            byteBuffer.putShort((short) record.data().length);
-            byteBuffer.put(record.data());
+        for (DNSSectionAnswer.DNSRecord answerRecord : answer.records()) {
+            encodeLabels(byteBuffer, answerRecord.name());
+            byteBuffer.putShort((short) answerRecord.dataType().value);
+            byteBuffer.putShort((short) answerRecord.dataClass().value);
+            byteBuffer.putInt(answerRecord.ttl());
+            byteBuffer.putShort((short) answerRecord.data().length);
+            byteBuffer.put(answerRecord.data());
         }
     }
 }

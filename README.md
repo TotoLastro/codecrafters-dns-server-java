@@ -15,7 +15,7 @@ various record types (A, AAAA, CNAME, etc) and more.
 # Passing the first stage
 
 The entry point for your `your_server.sh` implementation is in
-`src/main/java/Main.java`. Study and uncomment the relevant code, and push your
+`src/main/java/main/Main.java`. Study and uncomment the relevant code, and push your
 changes to pass the first stage:
 
 ```sh
@@ -32,6 +32,6 @@ Note: This section is for stages 2 and beyond.
 
 1. Ensure you have `java (21)` installed locally
 1. Run `./your_server.sh` to run your program, which is implemented in
-   `src/main/java/Main.java`.
+   `src/main/java/main/Main.java`.
 1. Commit your changes and run `git push origin master` to submit your solution
    to CodeCrafters. Test output will be streamed to your terminal.

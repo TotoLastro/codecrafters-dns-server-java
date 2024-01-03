@@ -1,12 +1,15 @@
+package main;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
+import domain.parsers.DNSMessageDecoder;
+
 public class Test {
     public static void main(String[] args) {
-        // -123, 11, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 3, 97, 98, 99, 17, 108, 111, 110, 103, 97, 115, 115, 100, 111, 109, 97, 105, 110, 110, 97, 109, 101, 3, 99, 111, 109, 0, 0, 1, 0, 1, 3, 100, 101, 102, -64, 16, 0, 1, 0, 1
         byte[] query = new byte[]{
             // Packet Identifer
             (byte) 0x85, (byte) 0x0B,

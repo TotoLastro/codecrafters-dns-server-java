@@ -14,6 +14,8 @@ import domain.model.DNSSectionQuestion;
 
 public class DNSMessageDecoder {
 
+    private DNSMessageDecoder() {}
+
     public static DNSMessage decode(byte[] buffer) {
         ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
         DNSSectionHeader header = decodeHeader(byteBuffer);

@@ -13,10 +13,15 @@ public class DNSMessageBuilder {
     private DNSMessageBuilder() {}
 
     public static DNSMessage createQuery(int packetIdentifier, List<DNSSectionQuestion.DNSQuestion> questions) {
+        return createQuery(packetIdentifier, 0, questions);
+    }
+
+    public static DNSMessage createQuery(int packetIdentifier, int operationCode, List<DNSSectionQuestion.DNSQuestion> questions) {
         DNSSectionHeader header = DNSSectionHeader.builder()
             .packetIdentifier(packetIdentifier)
             .queryOrResponse(DNSSectionHeader.QueryOrResponse.QUERY)
             .recursionDesired(1)
+            .operationCode(operationCode)
             .questionCount(questions.size())
             .build();
         DNSSectionQuestion question = new DNSSectionQuestion(questions);

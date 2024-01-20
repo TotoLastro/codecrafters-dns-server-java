@@ -51,7 +51,7 @@ public class ForwardedDNSResponse implements DNSResponseRetriever {
             new DNSSectionQuestion(Collections.singletonList(question)),
             new DNSSectionAnswer(Collections.emptyList())
         );
-        System.out.println("Forward(" + forwardAddress + ") : " + message);
+        System.out.println(STR."Forward(\{forwardAddress}) : \{message}");
         final byte[] queryBuffer = DNSMessageEncoder.encode(message);
         DatagramPacket packet = new DatagramPacket(queryBuffer, queryBuffer.length, forwardAddress);
         serverSocket.send(packet);
@@ -60,7 +60,7 @@ public class ForwardedDNSResponse implements DNSResponseRetriever {
         final DatagramPacket responseFromForward = new DatagramPacket(responseBuffer, responseBuffer.length);
         serverSocket.receive(responseFromForward);
         DNSMessage responseMessage = DNSMessageDecoder.decode(responseFromForward.getData());
-        System.out.println("Receive(" + responseFromForward.getSocketAddress() + ") : " + responseMessage);
+        System.out.println(STR."Receive(\{responseFromForward.getSocketAddress()}) : \{responseMessage}");
         return responseMessage;
     }
 

@@ -24,5 +24,17 @@ public record DNSSectionAnswer(List<DNSRecord> records) {
             result = 31 * result + Arrays.hashCode(data);
             return result;
         }
+
+        @Override
+        public String toString() {
+            return STR."""
+            DNSRecord{
+                name='\{name}',
+                dataType=\{dataType},
+                dataClass=\{dataClass},
+                ttl=\{ttl},
+                data=\{Arrays.toString(data)}
+            }""";
+        }
     }
 }

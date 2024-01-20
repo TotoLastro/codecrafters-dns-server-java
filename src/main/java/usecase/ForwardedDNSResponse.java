@@ -1,30 +1,26 @@
 package usecase;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
+import adapter.DNSReceiverGateway;
+import adapter.DNSRequesterGateway;
 import domain.model.DNSMessage;
 import domain.model.DNSSectionAnswer;
 import domain.model.DNSSectionHeader;
 import domain.model.DNSSectionQuestion;
-import domain.parsers.DNSMessageDecoder;
-import domain.parsers.DNSMessageEncoder;
 
 public class ForwardedDNSResponse implements DNSResponseRetriever {
 
-    private final DatagramSocket serverSocket;
-    private final InetSocketAddress forwardAddress;
+    private final DNSRequesterGateway dnsRequesterGateway;
+    private final DNSReceiverGateway dnsReceiverGateway;
 
-    public ForwardedDNSResponse(DatagramSocket serverSocket, InetSocketAddress forwardAddress) {
-        this.serverSocket = serverSocket;
-        this.forwardAddress = forwardAddress;
+    public ForwardedDNSResponse(DNSRequesterGateway dnsRequesterGateway, DNSReceiverGateway dnsReceiverGateway) {
+        this.dnsRequesterGateway = dnsRequesterGateway;
+        this.dnsReceiverGateway = dnsReceiverGateway;
     }
 
     @Override
@@ -51,22 +47,14 @@ public class ForwardedDNSResponse implements DNSResponseRetriever {
             new DNSSectionQuestion(Collections.singletonList(question)),
             new DNSSectionAnswer(Collections.emptyList())
         );
-        System.out.println(STR."Forward(\{forwardAddress}) : \{message}");
-        final byte[] queryBuffer = DNSMessageEncoder.encode(message);
-        DatagramPacket packet = new DatagramPacket(queryBuffer, queryBuffer.length, forwardAddress);
-        serverSocket.send(packet);
+        dnsRequesterGateway.send(message);
 
-        final byte[] responseBuffer = new byte[512];
-        final DatagramPacket responseFromForward = new DatagramPacket(responseBuffer, responseBuffer.length);
-        serverSocket.receive(responseFromForward);
-        DNSMessage responseMessage = DNSMessageDecoder.decode(responseFromForward.getData());
-        System.out.println(STR."Receive(\{responseFromForward.getSocketAddress()}) : \{responseMessage}");
-        return responseMessage;
+        return dnsReceiverGateway.receive();
     }
 
     private DNSSectionHeader cloneForOneQuestion(DNSSectionHeader header) {
         return new DNSSectionHeader(
-            new Random().nextInt(1, Short.MAX_VALUE * 2),
+            header.packetIdentifier(),
             DNSSectionHeader.QueryOrResponse.QUERY,
             header.operationCode(),
             header.authoritativeAnswer(),

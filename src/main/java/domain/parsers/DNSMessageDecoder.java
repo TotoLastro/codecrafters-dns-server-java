@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import domain.model.DNSMessage;
+import domain.model.DNSMessageClassType;
+import domain.model.DNSMessageType;
 import domain.model.DNSSectionAnswer;
 import domain.model.DNSSectionHeader;
 import domain.model.DNSSectionQuestion;
@@ -66,8 +68,8 @@ public class DNSMessageDecoder {
                     final int queryClass = byteBuffer.getShort();
                     return new DNSSectionQuestion.DNSQuestion(
                         labels,
-                        DNSMessage.Type.fromValue(queryType).orElseThrow(),
-                        DNSMessage.ClassType.fromValue(queryClass).orElseThrow()
+                        DNSMessageType.fromValue(queryType).orElseThrow(),
+                        DNSMessageClassType.fromValue(queryClass).orElseThrow()
                     );
                 }).collect(Collectors.toList())
         );
@@ -111,8 +113,8 @@ public class DNSMessageDecoder {
                 byteBuffer.get(data);
                 return new DNSSectionAnswer.DNSRecord(
                     labels,
-                    DNSMessage.Type.fromValue(queryType).orElseThrow(),
-                    DNSMessage.ClassType.fromValue(queryClass).orElseThrow(),
+                    DNSMessageType.fromValue(queryType).orElseThrow(),
+                    DNSMessageClassType.fromValue(queryClass).orElseThrow(),
                     ttl,
                     data
                 );

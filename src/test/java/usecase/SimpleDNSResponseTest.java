@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 
 import domain.model.DNSMessage;
+import domain.model.DNSMessageClassType;
+import domain.model.DNSMessageType;
 import domain.model.DNSSectionAnswer;
 import domain.model.DNSSectionHeader;
 import domain.model.DNSSectionQuestion;
@@ -42,8 +44,8 @@ class SimpleDNSResponseTest {
     @DisplayName("should return 8.8.8.8 as response for each query")
     void shouldReturnDefaultResponseForEachQuery() {
         List<DNSSectionQuestion.DNSQuestion> dnsQuestions = List.of(
-            createDNSQuestion("some.things", DNSMessage.Type.CNAME, DNSMessage.ClassType.HESIOD),
-            createDNSQuestion("", DNSMessage.Type.A, DNSMessage.ClassType.CHAOS)
+            createDNSQuestion("some.things", DNSMessageType.CNAME, DNSMessageClassType.HESIOD),
+            createDNSQuestion("", DNSMessageType.A, DNSMessageClassType.CHAOS)
         );
         DNSMessage query = createQuery(0xBEEF, dnsQuestions);
         DNSMessage actualResponse = systemUnderTest.getResponseMessage(query);
@@ -71,8 +73,8 @@ class SimpleDNSResponseTest {
     @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15})
     void shouldReturnDefaultResponseForEachQuery(int operationCode) {
         List<DNSSectionQuestion.DNSQuestion> dnsQuestions = List.of(
-            createDNSQuestion("some.things", DNSMessage.Type.CNAME, DNSMessage.ClassType.HESIOD),
-            createDNSQuestion("", DNSMessage.Type.A, DNSMessage.ClassType.CHAOS)
+            createDNSQuestion("some.things", DNSMessageType.CNAME, DNSMessageClassType.HESIOD),
+            createDNSQuestion("", DNSMessageType.A, DNSMessageClassType.CHAOS)
         );
         DNSMessage query = createQuery(0xDEAD, operationCode, dnsQuestions);
         DNSMessage actualResponse = systemUnderTest.getResponseMessage(query);

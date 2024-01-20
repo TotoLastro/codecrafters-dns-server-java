@@ -5,6 +5,8 @@ import java.util.List;
 
 import builders.DNSMessageBuilder;
 import domain.model.DNSMessage;
+import domain.model.DNSMessageClassType;
+import domain.model.DNSMessageType;
 import domain.parsers.DNSMessageEncoder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -137,7 +139,7 @@ class DNSMessageEncoderTest {
             List.of(createDNSQuestion("abcd.com")),
             List.of(
                 createDNSRecordWithResource("abcd.com", 0x7FFFFFFF, "Hello"),
-                createDNSRecord("sub.abcd.com", DNSMessage.Type.CNAME, DNSMessage.ClassType.INTERNET, 0xF, "World!".getBytes())
+                createDNSRecord("sub.abcd.com", DNSMessageType.CNAME, DNSMessageClassType.INTERNET, 0xF, "World!".getBytes())
             )
         );
 

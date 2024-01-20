@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 public record DNSSectionAnswer(List<DNSRecord> records) {
-    public record DNSRecord(String name, DNSMessage.Type dataType, DNSMessage.ClassType dataClass, int ttl, byte[] data) {
+    public record DNSRecord(String name, DNSMessageType dataType, DNSMessageClassType dataClass, int ttl, byte[] data) {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;

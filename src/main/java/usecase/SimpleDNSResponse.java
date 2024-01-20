@@ -3,6 +3,8 @@ package usecase;
 import java.util.stream.Collectors;
 
 import domain.model.DNSMessage;
+import domain.model.DNSMessageClassType;
+import domain.model.DNSMessageType;
 import domain.model.DNSSectionAnswer;
 import domain.model.DNSSectionHeader;
 
@@ -17,8 +19,8 @@ public class SimpleDNSResponse implements DNSResponseRetriever {
             questionMessage.question().questions().stream()
                 .map(question -> new DNSSectionAnswer.DNSRecord(
                     question.labels(),
-                    DNSMessage.Type.A,
-                    DNSMessage.ClassType.INTERNET,
+                    DNSMessageType.A,
+                    DNSMessageClassType.INTERNET,
                     60,
                     new byte[]{8, 8, 8, 8}
                 ))

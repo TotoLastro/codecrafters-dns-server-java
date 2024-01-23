@@ -95,14 +95,18 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
+                <configuration>
+                    <excludes>
+                        <exclude>main/*</exclude>
+                        <exclude>**/Socket*Gateway.class</exclude>
+                    </excludes>
+                    <propertyName>jacocoDestPathArgLine</propertyName>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
-                        <configuration>
-                            <propertyName>jacocoDestPathArgLine</propertyName>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>report</id>

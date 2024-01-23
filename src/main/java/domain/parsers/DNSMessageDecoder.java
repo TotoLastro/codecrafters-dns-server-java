@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import domain.model.DNSMessage;
@@ -62,7 +61,7 @@ public class DNSMessageDecoder {
     private static DNSSectionQuestion decodeQuestion(ByteBuffer byteBuffer, int numberOfQuestions) {
         return new DNSSectionQuestion(
             IntStream.range(0, numberOfQuestions)
-                .mapToObj(i -> {
+                .mapToObj(_ -> {
                     String labels = decodeLabels(byteBuffer);
                     final int queryType = byteBuffer.getShort();
                     final int queryClass = byteBuffer.getShort();
@@ -71,7 +70,7 @@ public class DNSMessageDecoder {
                         DNSMessageType.fromValue(queryType).orElseThrow(),
                         DNSMessageClassType.fromValue(queryClass).orElseThrow()
                     );
-                }).collect(Collectors.toList())
+                }).toList()
         );
     }
 
@@ -103,7 +102,7 @@ public class DNSMessageDecoder {
 
     private static DNSSectionAnswer decodeAnswer(ByteBuffer byteBuffer, int numberOfAnswers) {
         List<DNSSectionAnswer.DNSRecord> records = IntStream.range(0, numberOfAnswers)
-            .mapToObj(i -> {
+            .mapToObj(_ -> {
                 String labels = decodeLabels(byteBuffer);
                 int queryType = byteBuffer.getShort();
                 int queryClass = byteBuffer.getShort();
@@ -119,7 +118,7 @@ public class DNSMessageDecoder {
                     data
                 );
             })
-            .collect(Collectors.toList());
+            .toList();
         return new DNSSectionAnswer(records);
     }
 }

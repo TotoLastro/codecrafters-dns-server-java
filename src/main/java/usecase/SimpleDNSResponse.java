@@ -1,7 +1,5 @@
 package usecase;
 
-import java.util.stream.Collectors;
-
 import domain.model.DNSMessage;
 import domain.model.DNSMessageClassType;
 import domain.model.DNSMessageType;
@@ -24,7 +22,7 @@ public class SimpleDNSResponse implements DNSResponseRetriever {
                     60,
                     new byte[]{8, 8, 8, 8}
                 ))
-                .collect(Collectors.toList())
+                .toList()
         );
         DNSSectionHeader responseHeader = new DNSSectionHeader(
             questionMessage.header().packetIdentifier(),

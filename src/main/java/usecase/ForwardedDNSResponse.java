@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import adapter.DNSReceiverGateway;
 import adapter.DNSRequesterGateway;
@@ -33,7 +32,7 @@ public class ForwardedDNSResponse implements DNSResponseRetriever {
 
         List<DNSSectionAnswer.DNSRecord> answers = responses.stream()
             .flatMap(r -> r.answer().records().stream())
-            .collect(Collectors.toList());
+            .toList();
         return new DNSMessage(
             cloneWithSpecifiedAnswers(questionMessage.header(), responses),
             questionMessage.question(),

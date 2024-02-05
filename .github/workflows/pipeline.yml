@@ -70,13 +70,9 @@ jobs:
           cache: maven
       - uses: actions/download-artifact@v4
         with:
-          name: unit-tests-jacoco
+          pattern: '*-tests-jacoco'
           path: target/
-      - uses: actions/download-artifact@v4
-        with:
-          name: integration-tests-jacoco
-          path: target/
-          if_no_artifact_found: ignore
+          merge-multiple: true
       - name: merge results
         run: mvn jacoco:merge package jacoco:report verify -DskipTests
       - name: Upload jacoco coverage despite the check result

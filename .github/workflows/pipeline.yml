@@ -67,11 +67,11 @@ jobs:
         cache: maven
     - name: Run tests
       run: mvn test-compile jacoco:prepare-agent pitest:mutationCoverage -Dsurefire.failIfNoSpecifiedTests=false
-    - name: Upload jacoco exec results
-      uses: actions/upload-artifact@v4
+    - name: Upload pitest exec results to GithubPages
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        name: mutation-tests-jacoco
-        path: target/pit-reports
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: target/pit-reports
         if-no-files-found: ignore
 
   quality:

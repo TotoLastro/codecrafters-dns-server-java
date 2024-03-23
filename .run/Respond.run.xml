@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="main.Respond" type="Application" factoryName="Application">
-    <option name="MAIN_CLASS_NAME" value="main.Respond" />
+  <configuration default="false" name="fr.totolastro.codecrafters.dns.main.Respond" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="fr.totolastro.codecrafters.dns.main.Respond" />
     <module name="build-your-own-dns" />
     <method v="2">
       <option name="Make" enabled="true" />

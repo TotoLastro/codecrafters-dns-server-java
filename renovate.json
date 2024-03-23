@@ -1,6 +1,29 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "baseBranches": ["master"],
   "extends": [
-    "config:recommended"
-  ]
+    "config:recommended",
+    "github>renovatebot/.github",
+    ":separateMultipleMajorReleases"
+  ],
+  "schedule": ["at any time"],
+  "automergeSchedule": ["after 8am and before 8pm every weekday"],
+  "ignorePresets": [":prHourlyLimit2"],
+  "minimumReleaseAge": "3 days",
+  "internalChecksFilter": "strict",
+  "enabledManagers": ["maven"],
+  "ignorePaths": [],
+  "ignoreDeps": [],
+  "labels": ["DEPENDENCIES"],
+  "packageRules": [
+    {
+      "matchManagers": ["maven"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "addLabels": ["AUTO-MERGE"]
+    }
+  ],
+  "rebaseWhen": "behind-base-branch",
+  "prConcurrentLimit": 5,
+  "commitMessagePrefix": "[renovate](version): "
 }

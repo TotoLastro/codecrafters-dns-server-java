@@ -15,7 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jacoco.version>0.8.12</jacoco.version>
         <pitest.version>1.17.0</pitest.version>
-        <pitest.junit5.version>1.2.1</pitest.junit5.version>
+        <pitest.junit5.version>1.2.3</pitest.junit5.version>
     </properties>
 
     <dependencies>
